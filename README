@@ -1,0 +1,32 @@
+Here are files related to "Typographical Number Theory" from
+Douglas Hofstadter's 1979 book "Gödel, Escher, Bach".
+
+* python/wff.py is a naïve implementation of the rules for making
+well-formed formulas of TNT, as described in Chapter VIII. Because
+of rules such as "`<x⊃y>` is well-formed if both `x` and `y` are well-formed",
+this algorithm is very very slow on inputs such as `<x⊃⊃⊃⊃⊃⊃⊃⊃⊃y>`.
+
+* python/wff_quick.py is a "clever" parser using the classic
+shunting-yard algorithm. It detects well-formed formulas of TNT
+in roughly linear time.
+
+* python/derivation.py provides the class `Derivation`, which acts
+as a "bag of theorems". When you create a new `Derivation` object,
+its bag contains only the five axioms of TNT. Calling `d.step(s)`
+verifies (rather naïvely) that `s` can be derived in one step from
+the theorems in the bag; and then adds `s` to the bag. (If `s` cannot
+be derived, `step` throws an exception of type `InvalidStep`.)
+
+* python/derivation_examples.py converts some of Hofstadter's
+examples from Chapter 8 into `Derivation`s.
+
+* python/godelize_mu.py provides the class `Encoder`, which acts
+as a "compiler" of sorts for TNT. For example, if `e` is an `Encoder`,
+then `e.numeral(4)` returns `SSSS0` and `e.a_lessthan_b('x', 'Sy')`
+returns `∃b:(x+Sb)=Sy`. It also provides the class `MIUEncoder`,
+which builds on top of `Encoder` to Gödelize the MIU-system. Calling
+`e.mumon()` returns a 1934-character formula of TNT whose "second
+passive meaning" (in Hofstadter's phrasing) is "`MU` is a theorem
+of the MIU-system."
+
+Gödelizing TNT itself is left as an exercise for the reader. :)

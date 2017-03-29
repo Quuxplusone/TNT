@@ -11,6 +11,7 @@ class InvalidStep:
 
 class Derivation:
     def __init__(self, fantasy_setup=None):
+        self.handwaving = False
         if fantasy_setup is None:
             self.premise = None
             self.theorems = set([
@@ -25,9 +26,6 @@ class Derivation:
             self.premise, self.theorems = fantasy_setup
             self.theorems.add(self.premise)
             self.conclusion = self.premise
-
-    def has_been_derived(self, s):
-        return s in self.theorems
 
     def is_valid_by_joining(self, s):
         s = U(s)
@@ -260,10 +258,14 @@ class Derivation:
             False
         )
 
+    def handwave(self):
+        self.handwaving = True
+
     def step(self, s):
         s = U(s)
-        if not self.is_valid_new_theorem(s):
+        if not (self.handwaving or self.is_valid_new_theorem(s)):
             raise InvalidStep()
+        self.handwaving = False
         self.theorems.add(s)
         self.conclusion = s
 

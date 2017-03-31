@@ -130,3 +130,14 @@ d.step('(0+0)=0')                 # specialization of axiom 2
 d.step('∀b:(0+b)=b')              # induction
 d.step('(0+a)=a')                 # specialization
 d.step('∀a:(0+a)=a')              # generalization
+
+# Of my own invention: <∃b:a=SSb⊃∃c:a=Sc>
+d = Derivation()
+with d.fantasy('∀c:~a=Sc') as f:
+    f.step('~a=SSb')
+    f.step('∀b:~a=SSb')
+d.step('<∀c:~a=Sc⊃∀b:~a=SSb>')
+d.step('<~∃c:a=Sc⊃∀b:~a=SSb>')
+d.step('<~∃c:a=Sc⊃~∃b:a=SSb>')
+d.step('<~~∃b:a=SSb⊃~~∃c:a=Sc>')
+d.step('<∃b:a=SSb⊃∃c:a=Sc>')

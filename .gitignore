@@ -1,1 +1,3 @@
 /python-tnt/*.pyc
+/cpp-typogenetics/*.o
+/cpp-typogenetics/dna-test

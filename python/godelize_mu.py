@@ -5,6 +5,7 @@ import time
 import wff as wff_slow
 import wff_quick as wff
 import wff_quick as wff_quick
+from derivation import Derivation
 
 def allocates_only_quantified_variables(memberfunc):
     def wrap(self, *args):
@@ -193,6 +194,12 @@ class MIUEncoder(Encoder):
         ))
 
     @allocates_only_quantified_variables
+    def t_mod_3_is_0(self, t):
+        self.do_not_allocate_variables_in_terms(t)
+        x = self.reg()
+        return u'∃{x}:(SSS0⋅{x})={t}'.format(**locals())
+
+    @allocates_only_quantified_variables
     def mumon(self):
         return self.s_is_derivable_from_t(self.numeral(self.godel_number('MU')), self.numeral(self.godel_number('MI')))
 
@@ -208,6 +215,21 @@ if __name__ == '__main__':
     print 'Computing MUMON...'
     mumon = MIUEncoder().mumon()
     print mumon
+
+    e = MIUEncoder()
+    print 'Lemma 1 for proving MU underivable:'
+    print u'∀s:∀t:<<%s∧%s>⊃%s>' % (e.t_mod_3_is_0('t'), e.s_is_derivable_from_t_by_axiom_1('s', 't'), e.t_mod_3_is_0('s'))
+    e = MIUEncoder()
+    print 'Lemma 2 for proving MU underivable:'
+    print u'∀s:∀t:<<%s∧%s>⊃%s>' % (e.t_mod_3_is_0('t'), e.s_is_derivable_from_t_by_axiom_2('s', 't'), e.t_mod_3_is_0('s'))
+    e = MIUEncoder()
+    print 'Lemma 3 for proving MU underivable:'
+    print u'∀s:∀t:<<%s∧%s>⊃%s>' % (e.t_mod_3_is_0('t'), e.s_is_derivable_from_t_by_axiom_3('s', 't'), e.t_mod_3_is_0('s'))
+    e = MIUEncoder()
+    print 'Lemma 4 for proving MU underivable:'
+    print u'∀s:∀t:<<%s∧%s>⊃%s>' % (e.t_mod_3_is_0('t'), e.s_is_derivable_from_t_by_axiom_4('s', 't'), e.t_mod_3_is_0('s'))
+
+
 
     start = time.time()
     assert wff_quick.is_well_formed_formula(mumon)

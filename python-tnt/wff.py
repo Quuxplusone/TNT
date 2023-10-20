@@ -2,40 +2,34 @@
 
 import re
 
-def U(s):
-    if type(s) is unicode:
-        return s
-    return s.decode('utf8')
-
 def is_alphabetically_correct(s):
-    return set(s) <= set(u'0Sabcdefghijklmnopqrstuvwxyz′(+⋅)=~<∧∨⊃>∀∃:')
+    return set(s) <= set('0Sabcdefghijklmnopqrstuvwxyz′(+⋅)=~<∧∨⊃>∀∃:')
 
 def is_numeral(s):
-    return bool(re.match('S*0$', U(s)))
+    return bool(re.match('S*0$', s))
 
 assert all(is_numeral(x) for x in ['0', 'S0', 'SS0', 'SSS0', 'SSSS0', 'SSSSS0'])
 
 def is_variable(s):
-    return bool(re.match(u'[a-z]′*$', U(s)))
+    return bool(re.match('[a-z]′*$', s))
 
 assert all(is_variable(x) for x in ['a', 'b′', 'c′′', 'd′′′', 'e′′′′'])
 
 def is_term(s):
-    s = U(s)
     while s and s[0] == 'S':
         s = s[1:]
     if not s:
         return False
     if s[0] == '(' and s[-1] == ')':
         for i in range(len(s)):
-            if s[i] in u'+⋅' and is_term(s[1:i]) and is_term(s[i+1:-1]):
+            if s[i] in '+⋅' and is_term(s[1:i]) and is_term(s[i+1:-1]):
                 return True
     if is_numeral(s) or is_variable(s):
         return True
     return False
 
 def get_free_variables_in_term(s):
-    return set(re.findall(u'[a-z]′*', U(s)))
+    return set(re.findall('[a-z]′*', s))
 
 def is_definite_term(s):
     return is_term(s) and not get_free_variables_in_term(s)
@@ -57,7 +51,6 @@ class FormulaInfo:
         assert False  # you shouldn't be calling this
 
 def check_atom(s):
-    s = U(s)
     for i in range(len(s)):
         if s[i] == '=':
             t1, t2 = s[:i], s[i+1:]
@@ -68,16 +61,14 @@ def check_atom(s):
 assert all(check_atom(x).is_well_formed for x in ['S0=0', '(SS0+SS0)=SSSS0', 'S(b+c)=((c⋅d)⋅e)'])
 
 def check_negation(s):
-    s = U(s)
     if s and s[0] == '~':
         return check_well_formed_formula(s[1:])
     return FormulaInfo(False, None, None)
 
 def check_compound(s):
-    s = U(s)
     if s and s[0] == '<' and s[-1] == '>':
         for i in range(len(s)):
-            if s[i] in u'∧∨⊃':
+            if s[i] in '∧∨⊃':
                 f1 = check_well_formed_formula(s[1:i])
                 f2 = check_well_formed_formula(s[i+1:-1])
                 if f1.is_well_formed and f2.is_well_formed:
@@ -89,8 +80,7 @@ def check_compound(s):
     return FormulaInfo(False, None, None)
 
 def check_quantification(s):
-    s = U(s)
-    if s and s[0] in u'∀∃':
+    if s and s[0] in '∀∃':
         colon = s.find(':')
         if colon >= 0:
             v = s[1:colon]
@@ -100,7 +90,6 @@ def check_quantification(s):
     return FormulaInfo(False, None, None)
 
 def check_well_formed_formula(s):
-    s = U(s)
     for check in [check_atom, check_negation, check_compound, check_quantification]:
         f = check(s)
         if f.is_well_formed:
@@ -129,5 +118,5 @@ assert is_well_formed_formula('∃a:∃x:∃y:<<∃d:∃e:<x=(d⋅SSy)∧y=Se>�
 
 assert get_quantified_variables('∀c:<∃d:(c⋅d)=b⊃∃d:(d⋅SS0)=c>') == set(['c', 'd'])
 assert get_free_variables('∀c:<∃d:(c⋅d)=b⊃∃d:(d⋅SS0)=c>') == set(['b'])
-assert get_quantified_variables('∀a:<∃a′:(a⋅a′)=a′′⊃∃a′:(a′⋅SS0)=a>') == set(['a', u'a′'])
-assert get_free_variables('∀a:<∃a′:(a⋅a′)=a′′⊃∃a′:(a′⋅SS0)=a>') == set([u'a′′'])
+assert get_quantified_variables('∀a:<∃a′:(a⋅a′)=a′′⊃∃a′:(a′⋅SS0)=a>') == set(['a', 'a′'])
+assert get_free_variables('∀a:<∃a′:(a⋅a′)=a′′⊃∃a′:(a′⋅SS0)=a>') == set(['a′′'])

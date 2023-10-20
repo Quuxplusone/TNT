@@ -21,7 +21,7 @@ def allocates_only_quantified_variables(memberfunc):
 
 class Encoder:
     def __init__(self):
-        self.alphabet = u'abcdefghkmnopqrstuwxyz'
+        self.alphabet = 'abcdefghkmnopqrstuwxyz'
         self.exclude = set()
         self.r = None
 
@@ -33,7 +33,7 @@ class Encoder:
         if self.r is None:
             self.r = self.alphabet[0]
         if self.r[0] == self.alphabet[-1]:
-            self.r = self.alphabet[0] + u'′' + self.r[1:]
+            self.r = self.alphabet[0] + '′' + self.r[1:]
         else:
             self.r = self.alphabet[self.alphabet.find(self.r[0])+1] + self.r[1:]
         return self.reg() if self.r in self.exclude else self.r
@@ -51,14 +51,14 @@ class Encoder:
     def a_lessthan_b(self, a, b):
         self.do_not_allocate_variables_in_terms(a,b)
         r = self.reg()
-        return u'∃{r}:({a}+S{r})={b}'.format(**locals())
+        return '∃{r}:({a}+S{r})={b}'.format(**locals())
 
     @allocates_only_quantified_variables
     def a_mod_b_equals_c(self, a, b, c):
         self.do_not_allocate_variables_in_terms(a,b,c)
         r = self.reg()
         c_lessthan_b = self.a_lessthan_b(c, b)
-        result = u'∃{r}:<{a}=(({b}⋅{r})+{c})∧{c_lessthan_b}>'.format(**locals())
+        result = '∃{r}:<{a}=(({b}⋅{r})+{c})∧{c_lessthan_b}>'.format(**locals())
         return result
 
     @allocates_only_quantified_variables
@@ -70,7 +70,7 @@ class Encoder:
         #   ...
         # According to http://math.stackexchange.com/a/312915/121469,
         # any finite sequence can be represented in this way for at least one pair (a,b).
-        result = self.a_mod_b_equals_c(a, u'S({b}⋅S{k})'.format(**locals()), x)
+        result = self.a_mod_b_equals_c(a, 'S({b}⋅S{k})'.format(**locals()), x)
         assert wff.is_well_formed_formula(result)
         return result
 
@@ -83,7 +83,7 @@ class Encoder:
             fv |= wff.get_free_variables(a)
             qv |= wff.get_quantified_variables(a)
         assert not (qv & fv)
-        return u'<%s∧%s>' % (args[0], self.all(*args[1:]))
+        return '<%s∧%s>' % (args[0], self.all(*args[1:]))
 
     @allocates_only_quantified_variables
     def a_raised_to_b_is_c(self, a, b, c):
@@ -92,10 +92,10 @@ class Encoder:
         first_term_is_1 = self.abs_kth_term_is_x(x, y, self.numeral(0), self.numeral(1))
         bth_term_is_c = self.abs_kth_term_is_x(x, y, b, c)
         kth_term_is_z = self.abs_kth_term_is_x(x, y, k, z)
-        k1th_term_is_az = self.abs_kth_term_is_x(x, y, 'S'+k, u'({a}⋅{z})'.format(**locals()))
+        k1th_term_is_az = self.abs_kth_term_is_x(x, y, 'S'+k, '({a}⋅{z})'.format(**locals()))
         k_lessthan_b = self.a_lessthan_b(k, b)
-        inductive_case = u'∀{k}:∀{z}:<<{k_lessthan_b}∧{kth_term_is_z}>⊃{k1th_term_is_az}>'.format(**locals())
-        return u'∃%s:∃%s:%s' % (x, y, self.all(first_term_is_1, bth_term_is_c, inductive_case))
+        inductive_case = '∀{k}:∀{z}:<<{k_lessthan_b}∧{kth_term_is_z}>⊃{k1th_term_is_az}>'.format(**locals())
+        return '∃%s:∃%s:%s' % (x, y, self.all(first_term_is_1, bth_term_is_c, inductive_case))
 
 assert Encoder().numeral(0) == '0'
 assert Encoder().numeral(3) == 'SSS0'
@@ -119,8 +119,8 @@ class MIUEncoder(Encoder):
         self.do_not_allocate_variables_in_terms(s,t)
         m = self.reg()
         ten = self.numeral(10)
-        t_is_m1 = u'∃{m}:{t}=(({ten}⋅{m})+S0)'.format(**locals())
-        s_is_m10 = u'{s}=({ten}⋅{t})'.format(**locals())
+        t_is_m1 = '∃{m}:{t}=(({ten}⋅{m})+S0)'.format(**locals())
+        s_is_m10 = '{s}=({ten}⋅{t})'.format(**locals())
         return self.all(t_is_m1, s_is_m10)
 
     @allocates_only_quantified_variables
@@ -130,9 +130,9 @@ class MIUEncoder(Encoder):
         ten = self.numeral(10)
         p_is_ten_to_m = self.a_raised_to_b_is_c(self.numeral(10), m, p)
         n_lessthan_p = self.a_lessthan_b(n, p)
-        t_is_3n = u'{t}=((SSS0⋅{p})+{n})'.format(**locals())
-        s_is_3nn = u'{s}=(({p}⋅{t})+{n})'.format(**locals())
-        return u'∃%s:∃%s:∃%s:%s' % (m, n, p, self.all(p_is_ten_to_m, n_lessthan_p, t_is_3n, s_is_3nn))
+        t_is_3n = '{t}=((SSS0⋅{p})+{n})'.format(**locals())
+        s_is_3nn = '{s}=(({p}⋅{t})+{n})'.format(**locals())
+        return '∃%s:∃%s:∃%s:%s' % (m, n, p, self.all(p_is_ten_to_m, n_lessthan_p, t_is_3n, s_is_3nn))
 
     @allocates_only_quantified_variables
     def s_is_derivable_from_t_by_axiom_3(self, s, t):
@@ -142,10 +142,10 @@ class MIUEncoder(Encoder):
         p_is_ten_to_m = self.a_raised_to_b_is_c(self.numeral(10), m, p)
         n_lessthan_p = self.a_lessthan_b(n, p)
         q_is_ten_to_mplus3 = self.a_raised_to_b_is_c(self.numeral(10), 'SSS' + m, q)
-        n111 = u'((%s⋅S%s)+S0)' % (ten, ten)
-        t_is_k111n = u'{t}=((({k}⋅{q})+({n111}⋅{p}))+{n})'.format(**locals())
-        s_is_kn = u'{s}=((({ten}⋅{k})⋅{p})+{n})'.format(**locals())
-        return u'∃%s:∃%s:∃%s:∃%s:∃%s:%s' % (k, m, n, p, q, self.all(
+        n111 = '((%s⋅S%s)+S0)' % (ten, ten)
+        t_is_k111n = '{t}=((({k}⋅{q})+({n111}⋅{p}))+{n})'.format(**locals())
+        s_is_kn = '{s}=((({ten}⋅{k})⋅{p})+{n})'.format(**locals())
+        return '∃%s:∃%s:∃%s:∃%s:∃%s:%s' % (k, m, n, p, q, self.all(
             p_is_ten_to_m, n_lessthan_p, q_is_ten_to_mplus3, t_is_k111n, s_is_kn
         ))
 
@@ -157,9 +157,9 @@ class MIUEncoder(Encoder):
         p_is_ten_to_m = self.a_raised_to_b_is_c(self.numeral(10), m, p)
         n_lessthan_p = self.a_lessthan_b(n, p)
         q_is_ten_to_mplus2 = self.a_raised_to_b_is_c(self.numeral(10), 'SS' + m, q)
-        t_is_k00n = u'{t}=(({k}⋅{q})+{n})'.format(**locals())
-        s_is_kn = u'{s}=(({k}⋅{p})+{n})'.format(**locals())
-        return u'∃%s:∃%s:∃%s:∃%s:∃%s:%s' % (k, m, n, p, q, self.all(
+        t_is_k00n = '{t}=(({k}⋅{q})+{n})'.format(**locals())
+        s_is_kn = '{s}=(({k}⋅{p})+{n})'.format(**locals())
+        return '∃%s:∃%s:∃%s:∃%s:∃%s:%s' % (k, m, n, p, q, self.all(
             p_is_ten_to_m, n_lessthan_p, q_is_ten_to_mplus2, t_is_k00n, s_is_kn
         ))
 
@@ -182,12 +182,12 @@ class MIUEncoder(Encoder):
         kth_term_is_p = self.abs_kth_term_is_x(x, y, k, p)
         k1th_term_is_q = self.abs_kth_term_is_x(x, y, 'S'+k, q)
         p_implies_q = self.s_is_directly_derivable_from_t(q, p)
-        inductive_case = u'∀%s:∀%s:∀%s:<%s⊃%s>' % (k, p, q, self.all(
+        inductive_case = '∀%s:∀%s:∀%s:<%s⊃%s>' % (k, p, q, self.all(
             k_lessthan_n,
             kth_term_is_p,
             k1th_term_is_q,
         ), p_implies_q)
-        return u'∃%s:∃%s:∃%s:%s' % (x,y,n, self.all(
+        return '∃%s:∃%s:∃%s:%s' % (x,y,n, self.all(
             first_term_is_t,
             nth_term_is_s,
             inductive_case,
@@ -197,43 +197,41 @@ class MIUEncoder(Encoder):
     def t_mod_3_is_0(self, t):
         self.do_not_allocate_variables_in_terms(t)
         x = self.reg()
-        return u'∃{x}:(SSS0⋅{x})={t}'.format(**locals())
+        return '∃{x}:(SSS0⋅{x})={t}'.format(**locals())
 
     @allocates_only_quantified_variables
     def mumon(self):
         return self.s_is_derivable_from_t(self.numeral(self.godel_number('MU')), self.numeral(self.godel_number('MI')))
 
 if __name__ == '__main__':
-    assert wff.is_well_formed_formula(MIUEncoder().s_is_directly_derivable_from_t(u's', u't'))
-    assert wff.is_well_formed_formula(MIUEncoder().s_is_derivable_from_t(u's', u't'))
+    assert wff.is_well_formed_formula(MIUEncoder().s_is_directly_derivable_from_t('s', 't'))
+    assert wff.is_well_formed_formula(MIUEncoder().s_is_derivable_from_t('s', 't'))
 
-    b_is_a_power_of_10 = u'∃c:' + Encoder().a_raised_to_b_is_c(Encoder().numeral(10), 'c', 'b')
-    print 'A TNT expression encoding the statement "b is a power of 10" is:'
-    print b_is_a_power_of_10
+    b_is_a_power_of_10 = '∃c:' + Encoder().a_raised_to_b_is_c(Encoder().numeral(10), 'c', 'b')
+    print('A TNT expression encoding the statement "b is a power of 10" is:')
+    print(b_is_a_power_of_10)
     assert wff.is_well_formed_formula(b_is_a_power_of_10)
 
-    print 'Computing MUMON...'
+    print('Computing MUMON...')
     mumon = MIUEncoder().mumon()
-    print mumon
+    print(mumon)
 
     e = MIUEncoder()
-    print 'Lemma 1 for proving MU underivable:'
-    print u'∀s:∀t:<<%s∧%s>⊃%s>' % (e.t_mod_3_is_0('t'), e.s_is_derivable_from_t_by_axiom_1('s', 't'), e.t_mod_3_is_0('s'))
+    print('Lemma 1 for proving MU underivable:')
+    print('∀s:∀t:<<%s∧%s>⊃%s>' % (e.t_mod_3_is_0('t'), e.s_is_derivable_from_t_by_axiom_1('s', 't'), e.t_mod_3_is_0('s')))
     e = MIUEncoder()
-    print 'Lemma 2 for proving MU underivable:'
-    print u'∀s:∀t:<<%s∧%s>⊃%s>' % (e.t_mod_3_is_0('t'), e.s_is_derivable_from_t_by_axiom_2('s', 't'), e.t_mod_3_is_0('s'))
+    print('Lemma 2 for proving MU underivable:')
+    print('∀s:∀t:<<%s∧%s>⊃%s>' % (e.t_mod_3_is_0('t'), e.s_is_derivable_from_t_by_axiom_2('s', 't'), e.t_mod_3_is_0('s')))
     e = MIUEncoder()
-    print 'Lemma 3 for proving MU underivable:'
-    print u'∀s:∀t:<<%s∧%s>⊃%s>' % (e.t_mod_3_is_0('t'), e.s_is_derivable_from_t_by_axiom_3('s', 't'), e.t_mod_3_is_0('s'))
+    print('Lemma 3 for proving MU underivable:')
+    print('∀s:∀t:<<%s∧%s>⊃%s>' % (e.t_mod_3_is_0('t'), e.s_is_derivable_from_t_by_axiom_3('s', 't'), e.t_mod_3_is_0('s')))
     e = MIUEncoder()
-    print 'Lemma 4 for proving MU underivable:'
-    print u'∀s:∀t:<<%s∧%s>⊃%s>' % (e.t_mod_3_is_0('t'), e.s_is_derivable_from_t_by_axiom_4('s', 't'), e.t_mod_3_is_0('s'))
-
-
+    print('Lemma 4 for proving MU underivable:')
+    print('∀s:∀t:<<%s∧%s>⊃%s>' % (e.t_mod_3_is_0('t'), e.s_is_derivable_from_t_by_axiom_4('s', 't'), e.t_mod_3_is_0('s')))
 
     start = time.time()
     assert wff_quick.is_well_formed_formula(mumon)
-    print 'is_wff_quick took %s seconds' % (time.time() - start)
+    print('is_wff_quick took %s seconds' % (time.time() - start))
     start = time.time()
     assert wff_slow.is_well_formed_formula(mumon)
-    print 'is_wff took %s seconds' % (time.time() - start)
+    print('is_wff took %s seconds' % (time.time() - start))
